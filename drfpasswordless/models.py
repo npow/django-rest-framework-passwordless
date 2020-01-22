@@ -1,8 +1,8 @@
 import uuid
-from random import randint
 from django.db import models
 from django.conf import settings
-
+import string
+from django.utils.crypto import get_random_string
 
 def generate_hex_token():
     return uuid.uuid1().hex
@@ -13,7 +13,7 @@ def generate_numeric_token():
     Generate a random 6 digit string of numbers.
     We use this formatting to allow leading 0s.
     """
-    return str("%06d" % randint(0, 999999))
+    return get_random_string(length=6, allowed_chars=string.digits)
 
 
 class CallbackTokenManger(models.Manager):
@@ -37,7 +37,7 @@ class AbstractBaseCallbackToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=None, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
-    to_alias = models.CharField(blank=True, max_length=40)
+    to_alias = models.CharField(blank=True, max_length=254)
     to_alias_type = models.CharField(blank=True, max_length=20)
 
     objects = CallbackTokenManger()

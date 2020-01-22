@@ -39,9 +39,9 @@ curl -X POST -d "token=815381" localhost:8000/callback/auth/
 Requirements
 ============
 
-- Python (3.6+)
-- Django (2.0+)
-- Django Rest Framework + AuthToken (3.6+)
+- Python (3.7+)
+- Django (2.2+)
+- Django Rest Framework + AuthToken (3.10+)
 - Python-Twilio (Optional, for mobile.)
 
 
@@ -95,7 +95,7 @@ PASSWORDLESS_AUTH = {
    3a. If you’re using ``email``, see the Configuring Email section
    below.
 
-   3b. If you’re using ``mobile``, see the Configuring Email section
+   3b. If you’re using ``mobile``, see the Configuring Mobile section
    below.
 
 4. Add ``drfpasswordless.urls`` to your urls.py
@@ -136,6 +136,14 @@ Configuring Emails
 
 Specify the email address you’d like to send the callback token from
 with the ``PASSWORDLESS_EMAIL_NOREPLY_ADDRESS`` setting.
+```python
+PASSWORDLESS_AUTH = {
+   ..
+   'PASSWORDLESS_AUTH_TYPES': ['EMAIL',],
+   'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS': 'noreply@example.com',
+   ..
+}
+```
 
 You’ll also need to set up an SMTP server to send emails (`See Django
 Docs <https://docs.djangoproject.com/en/1.10/topics/email/>`__), but for
@@ -166,7 +174,8 @@ pipenv install twilio
 ```
 
 and set the ``TWILIO_ACCOUNT_SID`` and ``TWILIO_AUTH_TOKEN`` environment
-variables.
+variables. These are read from `os.environ`, so make sure you don't put
+them in your settings file accidentally.
 
 You’ll also need to specify the number you send the token from with the
 ``PASSWORDLESS_MOBILE_NOREPLY_NUMBER`` setting.
@@ -290,6 +299,13 @@ DEFAULTS = {
 
     # Automatically send verification email or sms when a user changes their alias.
     'PASSWORDLESS_AUTO_SEND_VERIFICATION_TOKEN': False,
+
+    # What function is called to construct an authentication tokens when
+    # exchanging a passwordless token for a real user auth token. This function
+    # should take a user and return a tuple of two values. The first value is
+    # the token itself, the second is a boolean value representating whether
+    # the token was newly created.
+    'PASSWORDLESS_AUTH_TOKEN_CREATOR': 'drfpasswordless.utils.create_authentication_token'
 }
 ```
 
